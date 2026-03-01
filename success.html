@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Verified | Phi-Games 2026</title>
+    <title>Enlisted | Phi-Games 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
             --gold: #c9a227;
+            --gold-glow: rgba(201, 162, 39, 0.4);
             --navy: #0c1f33;
             --glass: rgba(20, 45, 76, 0.85);
         }
@@ -19,130 +19,90 @@
             color: #f4f0e6;
             font-family: 'Libre Baskerville', serif;
             display: flex;
-            align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            text-align: center;
         }
 
-        .card {
+        .success-card {
             background: var(--glass);
-            padding: 40px;
-            border-radius: 12px;
-            border: 3px solid var(--gold);
-            text-align: center;
+            padding: 50px;
+            border-radius: 15px;
+            border: 1px solid rgba(201, 162, 39, 0.3);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             max-width: 500px;
             width: 90%;
-            box-shadow: 0 0 30px rgba(201, 162, 39, 0.3);
+            animation: fadeIn 1s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        img {
+            width: 80px;
+            filter: drop-shadow(0 0 10px var(--gold-glow));
+            margin-bottom: 20px;
         }
 
         h1 {
             font-family: 'Cinzel', serif;
             color: var(--gold);
-            margin-top: 0;
+            font-size: 32px;
+            margin: 0 0 15px;
+            letter-spacing: 3px;
         }
 
-        .receipt-box {
-            display: none;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px dashed var(--gold);
-            margin: 25px 0;
-        }
-
-        .order-num {
-            font-family: monospace;
-            font-size: 28px;
-            color: var(--gold);
-            font-weight: bold;
-            margin: 10px 0;
-            letter-spacing: 2px;
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            opacity: 0.9;
         }
 
         .primary-btn {
-            padding: 12px 24px;
+            padding: 15px 35px;
             background: var(--gold);
-            color: var(--navy);
+            color: #0c1f33;
             border: none;
-            border-radius: 6px;
-            font-weight: bold;
+            border-radius: 8px;
+            font-weight: 800;
+            font-family: 'Cinzel', serif;
             cursor: pointer;
-            font-family: 'Cinzel';
             text-decoration: none;
-            display: inline-block;
             transition: 0.3s;
+            display: inline-block;
         }
 
-            .primary-btn:hover {
-                transform: scale(1.05);
-            }
+        .primary-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--gold-glow);
+        }
+
+        .philanthropy-note {
+            margin-top: 25px;
+            font-size: 12px;
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h1 id="header">VERIFIED</h1>
-        <p id="msg">Thank you for your contribution to ALS Philanthropy.</p>
+<div class="success-card">
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/0b/Phi_Delta_Theta_Crest.png/250px-Phi_Delta_Theta_Crest.png" alt="Crest">
+    <h1>PURCHASE COMPLETE</h1>
+    <p>Thank you for donating.</p>
+    
+    <a href="index.html" class="primary-btn">RETURN TO BRACKET</a>
 
-        <div id="receipt" class="receipt-box">
-            <div style="font-size: 10px; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase;">Verification Code</div>
-            <div id="order-num" class="order-num">PHI-XXXX</div>
-            <p style="font-size: 12px; opacity: 0.8; margin-top: 10px;">Show this screen to staff at the food area to claim your items.</p>
-        </div>
-
-        <div style="margin-top: 30px;">
-            <a href="index.html" class="primary-btn">Return to Arena</a>
-        </div>
-    </div>
-
-    <script>
-        const params = new URLSearchParams(window.location.search);
-        const type = params.get('type');
-        const sessionId = params.get('session_id');
-
-        const header = document.getElementById('header');
-        const msg = document.getElementById('msg');
-        const receipt = document.getElementById('receipt');
-        const orderNum = document.getElementById('order-num');
-
-        if (type === 'food' || type === 'bundle') {
-            header.innerText = "ORDER CONFIRMED";
-            msg.innerText = "Your snacks and drinks are ready to be claimed!";
-            receipt.style.display = 'block';
-            orderNum.innerText = "PHI-" + (sessionId ? sessionId.slice(-8).toUpperCase() : "FOOD");
-        }
-        else if (type === 'team') {
-            header.innerText = "SQUAD REGISTERED";
-            msg.innerText = "Your team has been locked into the bracket! Head back to the Arena to see your placement.";
-        }
-        else if (type === 'donation') {
-            header.innerText = "THANK YOU DONOR";
-            msg.innerText = "Your generous donation will not go to waste! Thank you for supporting ALS Research.";
-        }
-
-        var end = Date.now() + (2 * 1000);
-        var colors = ['#c9a227', '#f4f0e6'];
-
-        (function frame() {
-            confetti({
-                particleCount: 2,
-                angle: 60,
-                spread: 55,
-                origin: { x: 0 },
-                colors: colors
-            });
-            confetti({
-                particleCount: 2,
-                angle: 120,
-                spread: 55,
-                origin: { x: 1 },
-                colors: colors
-            });
-
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());</script>
+    <div class="philanthropy-note">Supporting Iron Phi & ALS Research</div>
+</div>
 
 </body>
 </html>
