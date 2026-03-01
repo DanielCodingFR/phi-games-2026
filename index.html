@@ -174,9 +174,9 @@ async function load() {
         totalPaid.forEach(item => {
             totalRaised += (item.amount) ? parseInt(item.amount) : 10;
         });
-        document.getElementById('raised').innerText = raised;
-        document.getElementById('goalFill').style.width = Math.min((raised/GOAL)*100, 100) + "%";
-        document.getElementById('goalText').innerText = `$${raised} / $${GOAL} Goal`;
+        document.getElementById('raised').innerText = totalRaised;
+        document.getElementById('goalFill').style.width = Math.min((totalRaised/GOAL)*100, 100) + "%";
+        document.getElementById('goalText').innerText = `$${totalRaised} / $${GOAL} Goal`;
         
         if (players.length > 0) {
            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
