@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phi-Games 2026</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        :root {
+            --gold: #c9a227; --gold-glow: rgba(201, 162, 39, 0.4);
+            --navy: #0c1f33; --glass: rgba(20, 45, 76, 0.85); --loser-op: 0.15;
+        }
+        body { margin: 0; background: radial-gradient(circle at top, #162e4a 0%, #0c1f33 100%); color: #f4f0e6; font-family: 'Libre Baskerville', serif; overflow-x: auto; min-height: 100vh; }
+        header { text-align: center; padding: 30px 20px 10px; }
+        header img { width: 60px; filter: drop-shadow(0 0 10px var(--gold-glow)); margin-bottom: 10px; }
+        h1 { font-family: 'Cinzel', serif; font-size: 38px; margin: 0; color: var(--gold); cursor: pointer; }
+        .sub-head { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.7; }
+        
+        .container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 95%; max-width: 1400px; margin: 15px auto; }
+        .card { background: var(--glass); padding: 25px; border-radius: 12px; border: 1px solid rgba(201, 162, 39, 0.2); }
+        
+        /* LIVE FEED TICKER */
+        .live-feed { grid-column: span 2; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 6px; font-size: 12px; color: var(--gold); overflow: hidden; white-space: nowrap; border: 1px solid var(--gold-glow); }
+        .ticker { display: inline-block; animation: ticker 25s linear infinite; }
+        @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        /* DONATION CARD */
+        .donation-header { display: flex; justify-content: space-between; align-items: baseline; }
+        .progress-wrap { background: #081627; border-radius: 20px; height: 22px; border: 1px solid #1e3a5f; overflow: hidden; position: relative; margin-top: 15px; }
+        .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #a6851e, #c9a227); transition: width 1.5s ease; box-shadow: 0 0 15px var(--gold); }
+        .progress-text { position: absolute; width: 100%; text-align: center; top: 2px; font-weight: bold; font-size: 13px; color: white; text-shadow: 1px 1px 2px black; }
+
+        /* BRACKET EXPANSION SNIPPET */
+        .bracket-container { 
+            grid-column: span 2; position: relative; padding: 40px; overflow: auto; 
+            display: flex; flex-direction: column; min-height: 400px; transition: background 0.5s; 
+        }
+        .bracket-container:fullscreen { background: radial-gradient(circle at top, #162e4a 0%, #0c1f33 100%); padding: 60px; }
+        
+        /* FULL SCREEN BUTTON SNIPPET */
+        .fs-btn { position: absolute; top: 15px; right: 15px; padding: 8px 15px; background: var(--gold); color: #0c1f33; border: none; border-radius: 4px; font-weight: bold; font-family: 'Cinzel'; cursor: pointer; z-index: 10; font-size: 10px; }
+
+        .bracket { display: inline-flex; gap: 80px; margin: 20px auto; position: relative; z-index: 5; }
+        .round { display: flex; flex-direction: column; justify-content: space-around; gap: 20px; }
+        .match { background: rgba(12, 31, 51, 0.7); border: 1px solid rgba(201, 162, 39, 0.1); padding: 12px; border-radius: 10px; width: 190px; }
+        .team { padding: 10px; border-radius: 4px; font-size: 14px; font-weight: bold; cursor: pointer; background: rgba(0,0,0,0.4); margin: 4px 0; border: 1px solid transparent; transition: 0.3s; }
+        .team.winner-glow { color: var(--gold); border-color: var(--gold); background: rgba(201, 162, 39, 0.2); box-shadow: 0 0 10px var(--gold-glow); }
+        .team.loser { opacity: var(--loser-op); filter: grayscale(1); pointer-events: none; }
+
+        input, select { padding: 12px; background: #081627; border: 1px solid #1e3a5f; border-radius: 6px; color: white; margin-right: 8px; flex: 1; outline: none; }
+        button.primary-btn { padding: 12px 24px; background: var(--gold); color: #0c1f33; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-family: 'Cinzel'; }
+        
+        svg#lines { position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none; }
+        .flow-line { fill: none; stroke: rgba(201, 162, 39, 0.1); stroke-width: 2; transition: 0.5s; }
+        .flow-line.active { stroke: var(--gold); opacity: 1; filter: drop-shadow(0 0 5px var(--gold)); }
+    </style>
+</head>
+<body>
+
+<header>
+    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/0b/Phi_Delta_Theta_Crest.png/250px-Phi_Delta_Theta_Crest.png" alt="Crest">
+    <h1 id="mainTitle">PHI-GAMES 2026</h1>
+    <div class="sub-head">A Philanthropy Event for Phi Delt</div>
+</header>
+
+<div class="container">
+    <div class="live-feed"><div class="ticker" id="ticker">Sign up to Join in...</div></div>
+
+    <div class="card">
+        <h2 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;">Sign up your team</h2>
+        <div id="reg-ui" style="display:flex; flex-wrap: wrap; gap: 10px;">
+            <input type="text" id="teamName" placeholder="Team Name">
+            <select id="teamSize">
+                <option value="1">1 Player</option>
+                <option value="2">2 Players</option>
+                <option value="3">3 Players</option>
+            </select>
+            <button class="primary-btn" id="regBtn">Enter Tournament</button>
+        </div>
+        <div id="locked-msg" style="display:none; text-align:center; color:var(--gold);">Tournament in progress. Registration is closed.</div>
+    </div>
+
+<div class="card">
+    <div class="donation-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <h2 style="font-family: 'Cinzel'; color: var(--gold); margin:0;">Donation Total</h2>
+                <span onclick="load()" style="cursor:pointer; font-size: 18px; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6;">🔄</span>
+            </div>
+            <p style="font-size:11px; margin: 4px 0 0; color: #a6851e; font-weight: bold;">FOR ALS PHILANTHROPY!</p>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+            <div style="font-size: 28px; font-weight: bold; color: var(--gold);">$<span id="raised">0</span></div>
+            <button class="primary-btn" style="padding: 8px 16px; font-size: 12px; box-shadow: 0 0 10px var(--gold-glow);" onclick="handleDirectDonation()">DONATE</button>
+        </div>
+    </div>
+
+    <div class="progress-wrap">
+        <div class="progress-fill" id="goalFill"></div>
+        <div class="progress-text" id="goalText">$0 / $500 Goal</div>
+    </div>
+</div>
+
+    <div class="card bracket-container" id="fsContainer">
+        <button class="fs-btn" onclick="toggleFS()">FULL SCREEN</button>
+        <div class="bracket" id="root">
+            <svg id="lines"></svg>
+        </div>
+    </div>
+</div>
+
+<script>
+const crucible_supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
+let LOCKED = false;
+const GOAL = 500;
+let lastChampion = null;
+
+// FULL SCREEN SNIPPET
+function toggleFS() {
+    const el = document.getElementById('fsContainer');
+    if (!document.fullscreenElement) el.requestFullscreen();
+    else document.exitFullscreen();
+}
+document.addEventListener('fullscreenchange', () => setTimeout(draw, 500));
+
+// Add this to your <script> area
+window.handleDirectDonation = async () => {
+    const amount = prompt("Enter donation amount ($):", "25");
+    if (!amount || isNaN(amount) || amount <= 0) return;
+
+    // Call the new dedicated donation function
+    const { data, error } = await crucible_supabase.functions.invoke('direct-donation', { 
+        body: { amount: parseFloat(amount) } 
+    });
+    
+    if (error) {
+        console.error("Donation Error:", error);
+        alert("Could not open donation portal.");
+    }
+    if (data?.url) window.location.href = data.url;
+};
+
+function triggerConfetti() {
+    var count = 200;
+    var defaults = { origin: { y: 0.7 }, colors: ['#c9a227', '#f4f0e6', '#a6851e'] };
+    function fire(particleRatio, opts) {
+        confetti(Object.assign({}, defaults, opts, { particleCount: Math.floor(count * particleRatio) }));
+    }
+    fire(0.25, { spread: 26, startVelocity: 55 });
+    fire(0.2, { spread: 60 });
+    fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+    fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+    fire(0.1, { spread: 120, startVelocity: 45 });
+}
+
+async function load() {
+    const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
+    if (data) {
+        LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
+        if (LOCKED) { document.getElementById('reg-ui').style.display = 'none'; document.getElementById('locked-msg').style.display = 'block'; }
+        
+        const players = data.filter(t => t.team_name !== 'ADMIN_LOCK');
+        const raised = players.length * 10;
+        document.getElementById('raised').innerText = raised;
+        document.getElementById('goalFill').style.width = Math.min((raised/GOAL)*100, 100) + "%";
+        document.getElementById('goalText').innerText = `$${raised} / $${GOAL} Goal`;
+        
+        if (players.length > 0) {
+           const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+           document.getElementById('ticker').innerText = `[LAST UPDATE: ${time}] LATEST ENTRY: ${players[players.length-1].team_name} joined! • ${players.length} squads locked in for Iron Phi.`;
+            
+            const size = Math.pow(2, Math.ceil(Math.log2(players.length)));
+            const maxRounds = Math.log2(size);
+            const champion = players.find(p => p.bracket_round === maxRounds);
+            
+            if (champion && champion.team_name !== lastChampion) {
+                lastChampion = champion.team_name;
+                triggerConfetti();
+            }
+            render(players, maxRounds);
+        } else {
+            document.getElementById('root').innerHTML = "<div style='width:100%; text-align:center; padding:50px; opacity:0.3;'>Waiting on teams to start...</div>";
+        }
+    }
+}
+
+// RENDER SNIPPET: Dynamic SVG Resizing
+function render(players, rounds) {
+    const root = document.getElementById('root');
+    const svg = document.getElementById('lines');
+    root.innerHTML = '';
+    root.appendChild(svg); 
+
+    const size = Math.pow(2, Math.ceil(Math.log2(players.length)));
+
+    for (let r = 0; r < rounds; r++) {
+        const roundDiv = document.createElement('div');
+        roundDiv.className = 'round';
+        const mCount = size / Math.pow(2, r+1);
+
+        for (let m = 0; m < mCount; m++) {
+            const getOccupant = (slot) => {
+                const rangeSize = Math.pow(2, r);
+                const startIdx = (m * 2 + slot) * rangeSize;
+                const endIdx = startIdx + rangeSize - 1;
+                return players.slice(startIdx, endIdx + 1).find(p => p.bracket_round >= r);
+            };
+
+            const t1 = getOccupant(0);
+            const t2 = getOccupant(1);
+            const isBye = (r === 0 && t1 && !t2 && players.length > mCount);
+
+            roundDiv.innerHTML += `<div class="match" id="r${r}m${m}">
+                <div class="team ${t1?.is_loser?'loser':''} ${t1?.bracket_round>r||isBye?'winner-glow':''}" 
+                     onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
+                     ${t1?t1.team_name:(r===0?'---':'TBD')} ${isBye?'(BYE)':''}
+                </div>
+                <div class="team ${t2?.is_loser?'loser':''} ${t2?.bracket_round>r?'winner-glow':''}" 
+                     onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
+                     ${t2?t2.team_name:(r===0?'---':'TBD')}
+                </div>
+            </div>`;
+        }
+        root.appendChild(roundDiv);
+    }
+    // SCALE CANVAS TO BRACKET SIZE
+    setTimeout(() => {
+        svg.setAttribute('width', root.scrollWidth);
+        svg.setAttribute('height', root.scrollHeight);
+        draw();
+    }, 300);
+}
+
+window.advance = async (e, w, l, r, m) => {
+    if (!e.altKey || !w || w==='undefined') return;
+    await crucible_supabase.from('teams').update({ bracket_round: r+1, bracket_match: Math.floor(m/2), is_top: (m % 2 === 0), is_loser: false }).eq('team_name', w);
+    if (l && l!=='undefined') await crucible_supabase.from('teams').update({ is_loser: true }).eq('team_name', l);
+};
+
+window.toggleLock = async (e) => {
+    if (!e.altKey) return;
+    const p = prompt("Admin ('reset' or 'phi2026'):");
+    if (p === 'reset') {
+        if (confirm("Wipe database?")) {
+            await crucible_supabase.from('teams').delete().neq('team_name', 'VOID');
+            location.reload();
+        }
+        return;
+    }
+    if (p === 'phi2026') {
+        await crucible_supabase.from('teams').insert([{team_name:'ADMIN_LOCK', paid:true}]);
+        location.reload();
+    }
+};
+
+// DRAW SNIPPET: Scaled Coordinates
+function draw() {
+    const svg = document.getElementById('lines');
+    const root = document.getElementById('root');
+    const cont = root.getBoundingClientRect();
+    svg.innerHTML = '';
+    const rDivs = document.querySelectorAll('.round');
+    for (let i=0; i<rDivs.length-1; i++) {
+        const matches = rDivs[i].querySelectorAll('.match');
+        const next = rDivs[i+1].querySelectorAll('.match');
+        matches.forEach((m, idx) => {
+            const target = next[Math.floor(idx/2)];
+            if (!target) return;
+            const b1 = m.getBoundingClientRect(), b2 = target.getBoundingClientRect();
+            // Relative coordinates for scrolling container
+            const x1 = b1.right - cont.left, y1 = b1.top + (b1.height/2) - cont.top;
+            const x2 = b2.left - cont.left, y2 = b2.top + (b2.height/2) - cont.top;
+            const hasWinner = m.querySelectorAll('.winner-glow').length > 0;
+            const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("d", `M ${x1} ${y1} C ${x1+40} ${y1}, ${x2-40} ${y2}, ${x2} ${y2}`);
+            p.setAttribute("class", "flow-line " + (hasWinner ? "active" : ""));
+            svg.appendChild(p);
+        });
+    }
+}
+
+document.getElementById('mainTitle').addEventListener('click', toggleLock);
+document.getElementById('regBtn').addEventListener('click', async () => {
+    const name = document.getElementById("teamName").value;
+    const size = document.getElementById("teamSize").value;
+    if (!name) return alert("Enter team name.");
+    const { data } = await crucible_supabase.functions.invoke('resister-team-stripe', { body: { teamName: name, teamSize: size } });
+    if (data?.url) window.location.href = data.url;
+});
+crucible_supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, load).subscribe();
+window.onload = load; window.onresize = draw;
+</script>
+</body>
+</html>
