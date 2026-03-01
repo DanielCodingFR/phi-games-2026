@@ -450,18 +450,30 @@
             totalDisplay.innerText = total.toFixed(2);
         }
 
-        // CHECKOUT LOGIC
-        async function buyEntry(price, type) {
+        // Add this inside your <script> tag
+        window.buyEntry = async (price, type) => {
             const name = document.getElementById("teamName").value;
             const size = document.getElementById("teamSize").value;
+
             if (!name) return alert("Enter team name.");
 
-            // Calls your resister-team function with a custom price
-            const { data } = await crucible_supabase.functions.invoke('resister-team-stripe', {
-                body: { teamName: name, teamSize: size, amount: price, type: type }
+            // Call the resister-team function and pass ALL needed data
+            const { data, error } = await crucible_supabase.functions.invoke('resister-team-stripe', {
+                body: {
+                    teamName: name,
+                    teamSize: size,
+                    amount: price,
+                    type: type
+                }
             });
+
+            if (error) {
+                console.error("Stripe Error:", error);
+                return alert("Could not open payment portal.");
+            }
+
             if (data?.url) window.location.href = data.url;
-        }
+        };
 
         async function checkoutCart() {
             if (cart.length === 0) return alert("Your tray is empty!");
