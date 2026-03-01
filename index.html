@@ -100,7 +100,7 @@
 
     <div class="progress-wrap">
         <div class="progress-fill" id="goalFill"></div>
-        <div class="progress-text" id="goalText">$0 / $500 Goal</div>
+        <div class="progress-text" id="goalText">$0 / $2000 Goal</div>
     </div>
 </div>
 
@@ -115,7 +115,7 @@
 <script>
 const crucible_supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
 let LOCKED = false;
-const GOAL = 500;
+const GOAL = 2000;
 let lastChampion = null;
 
 // FULL SCREEN SNIPPET
@@ -171,7 +171,7 @@ async function load() {
         if (players.length > 0) {
            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     
-           document.getElementById('ticker').innerText = `[LAST UPDATE: ${time}] LATEST ENTRY: ${players[players.length-1].team_name} joined! • ${players.length} squads locked in for Iron Phi.`;
+           document.getElementById('ticker').innerText = `[LAST UPDATE: ${time}] LATEST ENTRY: ${players[players.length-1].team_name} joined! • ${players.length} squads locked in for Phi-Games.`;
             
             const size = Math.pow(2, Math.ceil(Math.log2(players.length)));
             const maxRounds = Math.log2(size);
