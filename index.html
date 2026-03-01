@@ -27,20 +27,17 @@
         .ticker { display: inline-block; animation: ticker 25s linear infinite; }
         @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        /* DONATION CARD */
         .donation-header { display: flex; justify-content: space-between; align-items: baseline; }
         .progress-wrap { background: #081627; border-radius: 20px; height: 22px; border: 1px solid #1e3a5f; overflow: hidden; position: relative; margin-top: 15px; }
         .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #a6851e, #c9a227); transition: width 1.5s ease; box-shadow: 0 0 15px var(--gold); }
         .progress-text { position: absolute; width: 100%; text-align: center; top: 2px; font-weight: bold; font-size: 13px; color: white; text-shadow: 1px 1px 2px black; }
 
-        /* BRACKET EXPANSION SNIPPET */
         .bracket-container { 
             grid-column: span 2; position: relative; padding: 40px; overflow: auto; 
             display: flex; flex-direction: column; min-height: 400px; transition: background 0.5s; 
         }
         .bracket-container:fullscreen { background: radial-gradient(circle at top, #162e4a 0%, #0c1f33 100%); padding: 60px; }
         
-        /* FULL SCREEN BUTTON SNIPPET */
         .fs-btn { position: absolute; top: 15px; right: 15px; padding: 8px 15px; background: var(--gold); color: #0c1f33; border: none; border-radius: 4px; font-weight: bold; font-family: 'Cinzel'; cursor: pointer; z-index: 10; font-size: 10px; }
 
         .bracket { display: inline-flex; gap: 80px; margin: 20px auto; position: relative; z-index: 5; }
@@ -140,7 +137,6 @@ window.handleDirectDonation = async () => {
     const amount = prompt("Enter donation amount ($):", "25");
     if (!amount || isNaN(amount) || amount <= 0) return;
 
-    // Call the new dedicated donation function
     const { data, error } = await crucible_supabase.functions.invoke('direct-donation', { 
         body: { amount: parseFloat(amount) } 
     });
@@ -171,8 +167,13 @@ async function load() {
         LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
         if (LOCKED) { document.getElementById('reg-ui').style.display = 'none'; document.getElementById('locked-msg').style.display = 'block'; }
         
-        const players = data.filter(t => t.team_name !== 'ADMIN_LOCK');
-        const raised = players.length * 10;
+        const totalPaid = data.filter(t => t.team_name !== 'ADMIN_LOCK');
+        const players = totalPaid.filter(t => t.team_name !== 'DONATION_ONLY');
+
+        let totalRaised = 0;
+        totalPaid.forEach(item => {
+            totalRaised += (item.amount) ? parseInt(item.amount) : 10;
+        });
         document.getElementById('raised').innerText = raised;
         document.getElementById('goalFill').style.width = Math.min((raised/GOAL)*100, 100) + "%";
         document.getElementById('goalText').innerText = `$${raised} / $${GOAL} Goal`;
@@ -222,16 +223,18 @@ function render(players, rounds) {
             const t2 = getOccupant(1);
             const isBye = (r === 0 && t1 && !t2 && players.length > mCount);
 
-            roundDiv.innerHTML += `<div class="match" id="r${r}m${m}">
-                <div class="team ${t1?.is_loser?'loser':''} ${t1?.bracket_round>r||isBye?'winner-glow':''}" 
+            roundDiv.innerHTML += `<div class="match" id="r${r}m${m}" style="position:relative;">
+                <div class="team ${t1?.is_loser ? 'loser' : ''} ${t1?.bracket_round > r || isBye ? 'winner-glow' : ''}" 
                      onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
-                     ${t1?t1.team_name:(r===0?'---':'TBD')} ${isBye?'(BYE)':''}
-	             ${t1 && t1.team_size ? `<span class="player-count">${t1.team_size} Players</span>` : ''}
+                     ${t1?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
+                     ${t1 ? t1.team_name : (r === 0 ? '---' : 'TBD')} ${isBye ? '(BYE)' : ''}
+                     ${t1 && t1.team_size ? `<span class="player-count">${t1.team_size} Players</span>` : ''}
                 </div>
-                <div class="team ${t2?.is_loser?'loser':''} ${t2?.bracket_round>r?'winner-glow':''}" 
+                <div class="team ${t2?.is_loser ? 'loser' : ''} ${t2?.bracket_round > r ? 'winner-glow' : ''}" 
                      onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
-                     ${t2?t2.team_name:(r===0?'---':'TBD')}
-		     ${t2 && t2.team_size ? `<span class="player-count">${t2.team_size} Players</span>` : ''}
+                     ${t2?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
+                     ${t2 ? t2.team_name : (r === 0 ? '---' : 'TBD')}
+                     ${t2 && t2.team_size ? `<span class="player-count">${t2.team_size} Players</span>` : ''}
                 </div>
             </div>`;
         }
