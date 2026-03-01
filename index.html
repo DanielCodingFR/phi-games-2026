@@ -189,54 +189,34 @@ function triggerConfetti() {
     fire(0.1, { spread: 120, startVelocity: 45 });
 }
 
-aasync function load() {
+async function load() {
     const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
-    
     if (data) {
         LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
-        if (LOCKED) { 
-            document.getElementById('reg-ui').style.display = 'none'; 
-            document.getElementById('locked-msg').style.display = 'block'; 
-        }
+        if (LOCKED) { document.getElementById('reg-ui').style.display = 'none'; document.getElementById('locked-msg').style.display = 'block'; }
         
-        const totalPaid = data.filter(t => t.team_name !== 'ADMIN_LOCK');
-        const players = totalPaid.filter(t => t.team_name !== 'DONATION_ONLY');
-
-        let totalRaised = 0;
-        totalPaid.forEach(item => {
-            totalRaised += (item.amount) ? item.amount : 10; 
-        });
-
-        document.getElementById('raised').innerText = totalRaised;
-        document.getElementById('goalFill').style.width = Math.min((totalRaised/GOAL)*100, 100) + "%";
-        document.getElementById('goalText').innerText = `$${totalRaised} / $${GOAL} Goal`;
+        const players = data.filter(t => t.team_name !== 'ADMIN_LOCK');
+        const raised = players.length * 10;
+        document.getElementById('raised').innerText = raised;
+        document.getElementById('goalFill').style.width = Math.min((raised/GOAL)*100, 100) + "%";
+        document.getElementById('goalText').innerText = `$${raised} / $${GOAL} Goal`;
         
-        const winSquare = document.getElementById('winner-square');
-
         if (players.length > 0) {
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            document.getElementById('ticker').innerText = `[LAST UPDATE: ${time}] LATEST ENTRY: ${players[players.length-1].team_name} joined! • ${players.length} squads locked in.`;
+           const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    
+           document.getElementById('ticker').innerText = `[LAST UPDATE: ${time}] LATEST ENTRY: ${players[players.length-1].team_name} joined! • ${players.length} squads locked in for Phi-Games.`;
             
             const size = Math.pow(2, Math.ceil(Math.log2(players.length)));
             const maxRounds = Math.log2(size);
             const champion = players.find(p => p.bracket_round === maxRounds);
             
-            if (champion) {
-                document.getElementById('displayWinner').innerText = champion.team_name.toUpperCase();
-                winSquare.style.display = 'block'; 
-                
-                if (champion.team_name !== lastChampion) {
-                    lastChampion = champion.team_name;
-                    triggerConfetti(); // Fire celebration
-                }
-            } else {
-                winSquare.style.display = 'none'; 
+            if (champion && champion.team_name !== lastChampion) {
+                lastChampion = champion.team_name;
+                triggerConfetti();
             }
-
             render(players, maxRounds);
         } else {
             document.getElementById('root').innerHTML = "<div style='width:100%; text-align:center; padding:50px; opacity:0.3;'>Waiting on teams to start...</div>";
-            winSquare.style.display = 'none';
         }
     }
 }
