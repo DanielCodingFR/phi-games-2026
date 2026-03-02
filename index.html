@@ -341,8 +341,10 @@
 
         <div class="card bracket-container" id="fsContainer">
             <button class="fs-btn" onclick="toggleFS()">FULL SCREEN</button>
-            <div class="bracket" id="root">
-                <svg id="lines"></svg>
+            <div class="bracket" style="position: relative;">
+                <svg id="lines" style="position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;"></svg>
+                <div id="root" style="position: relative; z-index: 2;">
+                </div>
             </div>
         </div>
     </div>
@@ -392,42 +394,6 @@
             fire(0.1, { spread: 120, startVelocity: 45 });
         }
 
-        async function load() {
-            const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
-            if (data) {
-                LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
-                if (LOCKED) { document.getElementById('reg-ui').style.display = 'none'; document.getElementById('locked-msg').style.display = 'block'; }
-
-                const totalPaid = data.filter(t => t.team_name !== 'ADMIN_LOCK');
-                const players = totalPaid.filter(t => t.team_name !== 'DONATION_ONLY');
-
-                let totalRaised = 0;
-                totalPaid.forEach(item => {
-                    totalRaised += (item.amount) ? parseInt(item.amount) : 10;
-                });
-                document.getElementById('raised').innerText = totalRaised;
-                document.getElementById('goalFill').style.width = Math.min((totalRaised / GOAL) * 100, 100) + "%";
-                document.getElementById('goalText').innerText = `$${totalRaised} / $${GOAL} Goal`;
-
-                if (players.length > 0) {
-                    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-
-                    document.getElementById('ticker').innerText = `[LAST UPDATE: ${time}] LATEST ENTRY: ${players[players.length - 1].team_name} joined! • ${players.length} squads locked in for Phi-Games.`;
-
-                    const size = Math.pow(2, Math.ceil(Math.log2(players.length)));
-                    const maxRounds = Math.log2(size);
-                    const champion = players.find(p => p.bracket_round === maxRounds);
-
-                    if (champion && champion.team_name !== lastChampion) {
-                        lastChampion = champion.team_name;
-                        triggerConfetti();
-                    }
-                    render(players, maxRounds);
-                } else {
-                    document.getElementById('root').innerHTML = "<div style='width:100%; text-align:center; padding:50px; opacity:0.3;'>Waiting on teams to start...</div>";
-                }
-            }
-        }
         let cart = [];
 
         function showView(view) {
@@ -497,14 +463,61 @@
         }
 
         window.addEventListener('load', renderMenu);    
+        // Replace your existing load() function with this improved version
+        async function load() {
+            const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
+
+            if (data) {
+                LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
+                if (LOCKED) {
+                    document.getElementById('reg-ui').style.display = 'none';
+                    document.getElementById('locked-msg').style.display = 'block';
+                }
+
+                const totalPaid = data.filter(t => t.team_name !== 'ADMIN_LOCK');
+                const players = totalPaid.filter(t => t.team_name !== 'DONATION_ONLY');
+
+                // FIXED: Summing total raised with proper decimal support for food/donations
+                let totalRaised = 0;
+                totalPaid.forEach(item => {
+                    totalRaised += Number(item.amount || 0);
+                });
+
+                document.getElementById('raised').innerText = totalRaised.toFixed(2);
+                document.getElementById('goalFill').style.width = Math.min((totalRaised / GOAL) * 100, 100) + "%";
+                document.getElementById('goalText').innerText = `$${totalRaised.toFixed(2)} / $${GOAL} Goal`;
+
+                if (players.length > 0) {
+                    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    document.getElementById('ticker').innerText = `[UPDATE: ${time}] LATEST ENTRY: ${players[players.length - 1].team_name} joined! • ${players.length} squads locked in.`;
+
+                    // FIXED: LONE WOLF LOGIC - Force at least 1 round even for 1 player
+                    const effectiveCount = Math.max(players.length, 2);
+                    const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
+                    const rounds = Math.ceil(Math.log2(size));
+
+                    const champion = players.find(p => p.bracket_round === rounds && players.length > 1);
+
+                    if (champion && champion.team_name !== lastChampion) {
+                        lastChampion = champion.team_name;
+                        triggerConfetti();
+                    }
+                    render(players, rounds);
+                } else {
+                    document.getElementById('root').innerHTML = "<div style='width:100%; text-align:center; padding:50px; opacity:0.3;'>Waiting on the first team to join the Arena...</div>";
+                }
+            }
+        }
+
+        // Replace your existing render() function with this one
         function render(players, rounds) {
             const root = document.getElementById('root');
             const svg = document.getElementById('lines');
             root.innerHTML = '';
+            // We don't append SVG here anymore because it's fixed in your HTML structure
 
-            const effectivePlayerCount = Math.max(players.length, 2);
-            const size = Math.pow(2, Math.ceil(Math.log2(effectivePlayerCount)));
-            const actualRounds = Math.max(rounds, 1);;
+            const effectiveCount = Math.max(players.length, 2);
+            const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
 
             for (let r = 0; r < rounds; r++) {
                 const roundDiv = document.createElement('div');
@@ -523,28 +536,25 @@
                     const t2 = getOccupant(1);
                     const isBye = (r === 0 && t1 && !t2 && players.length > mCount);
 
-                    roundDiv.innerHTML += `<div class="match" id="r${r}m${m}" style="position:relative;">
-                        <div class="team ${t1?.is_loser ? 'loser' : ''} ${t1?.bracket_round > r || isBye ? 'winner-glow' : ''}"
-                             onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
-                             ${t1?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
-                             ${t1 ? t1.team_name : (r === 0 ? '---' : 'TBD')} ${isBye ? '(BYE)' : ''}
-                             ${t1 && t1.team_size ? `<span class="player-count">${t1.team_size} Players</span>` : ''}
-                        </div>
-                        <div class="team ${t2?.is_loser ? 'loser' : ''} ${t2?.bracket_round > r ? 'winner-glow' : ''}"
-                             onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
-                             ${t2?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
-                             ${t2 ? t2.team_name : (r === 0 ? '---' : 'TBD')}
-                             ${t2 && t2.team_size ? `<span class="player-count">${t2.team_size} Players</span>` : ''}
-                        </div>
-                    </div>`;
+                    roundDiv.innerHTML += `
+                <div class="match" id="r${r}m${m}" style="position:relative;">
+                    <div class="team ${t1?.is_loser ? 'loser' : ''} ${t1?.bracket_round > r || isBye ? 'winner-glow' : ''}"
+                         onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
+                         ${t1?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
+                         ${t1 ? t1.team_name : (r === 0 ? '---' : 'TBD')} ${isBye ? '(BYE)' : ''}
+                         ${t1 && t1.team_size ? `<span class="player-count">${t1.team_size} Players</span>` : ''}
+                    </div>
+                    <div class="team ${t2?.is_loser ? 'loser' : ''} ${t2?.bracket_round > r ? 'winner-glow' : ''}"
+                         onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
+                         ${t2?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
+                         ${t2 ? t2.team_name : (r === 0 ? '---' : 'TBD')}
+                         ${t2 && t2.team_size ? `<span class="player-count">${t2.team_size} Players</span>` : ''}
+                    </div>
+                </div>`;
                 }
                 root.appendChild(roundDiv);
             }
-            setTimeout(() => {
-                svg.setAttribute('width', root.scrollWidth);
-                svg.setAttribute('height', root.scrollHeight);
-                draw();
-            }, 300);
+            setTimeout(draw, 300);
         }
 
         window.advance = async (e, w, l, r, m) => {
@@ -572,6 +582,8 @@
         function draw() {
             const svg = document.getElementById('lines');
             const root = document.getElementById('root');
+            if (!svg || !root) return; // FIX: Exit early if elements are missing
+
             const cont = root.getBoundingClientRect();
             svg.innerHTML = '';
             const rDivs = document.querySelectorAll('.round');
