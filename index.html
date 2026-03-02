@@ -136,8 +136,8 @@
             position: relative;
             padding: 40px;
             overflow: auto;
-            display: flex;
-            flex-direction: column;
+            display: inline-flex;
+            flex-direction: row;
             min-height: 400px;
             transition: background 0.5s;
         }
@@ -278,61 +278,14 @@
     </div>
 
     <div id="arena-view" class="view-section">
-        <div class="container">
-            <div class="live-feed"><div class="ticker" id="ticker">Sign up to Join in...</div></div>
-
-            <div class="card">
-                <h2 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;">Sign up your team</h2>
-                <div id="reg-ui" style="display:flex; flex-wrap: wrap; gap: 10px;">
-                    <input type="text" id="teamName" placeholder="Team Name">
-                    <select id="teamSize">
-                        <option value="1">1 Player</option>
-                        <option value="2">2 Players</option>
-                        <option value="3">3 Players</option>
-                        <option value="4">4 Players</option>
-                        <option value="5">5 Players</option>
-                    </select>
-                    <button class="primary-btn" id="regBtn">Enter Tournament</button>
-                </div>
-                <div id="locked-msg" style="display:none; text-align:center; color:var(--gold);">Tournament in progress. Registration is closed.</div>
-            </div>
-
-            <div class="card">
-                <div class="donation-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div>
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <h2 style="font-family: 'Cinzel'; color: var(--gold); margin:0;">Donation Total</h2>
-                            <span onclick="load()" style="cursor:pointer; font-size: 18px; opacity: 0.6;">🔄</span>
-                        </div>
-                        <p style="font-size:11px; margin: 4px 0 0; color: #a6851e; font-weight: bold;">FOR ALS PHILANTHROPY!</p>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-                        <div style="font-size: 28px; font-weight: bold; color: var(--gold);">$<span id="raised">0</span></div>
-                        <button class="primary-btn" style="padding: 8px 16px; font-size: 12px;" onclick="handleDirectDonation()">DONATE</button>
-                    </div>
-                </div>
-
-                <div class="progress-wrap">
-                    <div class="progress-fill" id="goalFill"></div>
-                    <div class="progress-text" id="goalText">$0 / $2000 Goal</div>
-                </div>
-            </div>
-
-            <div class="card bracket-container" id="fsContainer">
-                <button class="fs-btn" onclick="toggleFS()">FULL SCREEN</button>
-                <div class="bracket" style="position: relative;">
-                    <svg id="lines" style="position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;"></svg>
-                    <div id="root" style="position: relative; z-index: 2;"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div id="menu-view" class="view-section" style="display: none;">
         <div class="container" style="grid-template-columns: 1fr 350px;">
             <div class="card">
-                <h2 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;">Phi-Games Menu</h2>
-                <div id="food-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;"></div>
+                <h2 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;"Phi-Games Menu</h2>
+                <div id="food-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                </div>
             </div>
             <div class="card">
                 <h3 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;">Your Tray</h3>
@@ -346,128 +299,114 @@
             </div>
         </div>
     </div>
+    <div class="container">
+        <div class="live-feed"><div class="ticker" id="ticker">Sign up to Join in...</div></div>
 
-    <script>const crucible_supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
+        <div class="card">
+            <h2 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;">Sign up your team</h2>
+            <div id="reg-ui" style="display:flex; flex-wrap: wrap; gap: 10px;">
+                <input type="text" id="teamName" placeholder="Team Name">
+                <select id="teamSize">
+                    <option value="1">1 Player</option>
+                    <option value="2">2 Players</option>
+                    <option value="3">3 Players</option>
+                    <option value="4">4 Players</option>
+                    <option value="5">5 Players</option>
+                </select>
+                <button class="primary-btn" id="regBtn">Enter Tournament</button>
+            </div>
+            <div id="locked-msg" style="display:none; text-align:center; color:var(--gold);">Tournament in progress. Registration is closed.</div>
+        </div>
+
+        <div class="card">
+            <div class="donation-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h2 style="font-family: 'Cinzel'; color: var(--gold); margin:0;">Donation Total</h2>
+                        <span onclick="load()" style="cursor:pointer; font-size: 18px; opacity: 0.6; transition: 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.6;">🔄</span>
+                    </div>
+                    <p style="font-size:11px; margin: 4px 0 0; color: #a6851e; font-weight: bold;">FOR ALS PHILANTHROPY!</p>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                    <div style="font-size: 28px; font-weight: bold; color: var(--gold);">$<span id="raised">0</span></div>
+                    <button class="primary-btn" style="padding: 8px 16px; font-size: 12px; box-shadow: 0 0 10px var(--gold-glow);" onclick="handleDirectDonation()">DONATE</button>
+                </div>
+            </div>
+
+            <div class="progress-wrap">
+                <div class="progress-fill" id="goalFill"></div>
+                <div class="progress-text" id="goalText">$0 / $2000 Goal</div>
+            </div>
+        </div>
+
+        <div class="card bracket-container" id="fsContainer">
+            <button class="fs-btn" onclick="toggleFS()">FULL SCREEN</button>
+            <div class="bracket" style="position: relative;">
+                <svg id="lines" style="position: absolute; top: 0; left: 0; z-index: 1; pointer-events: none;"></svg>
+                <div id="root" style="position: relative; z-index: 2;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const crucible_supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
         let LOCKED = false;
         const GOAL = 2000;
         let lastChampion = null;
+
+        function toggleFS() {
+            const el = document.getElementById('fsContainer');
+            if (!document.fullscreenElement) el.requestFullscreen();
+            else document.exitFullscreen();
+        }
+        document.addEventListener('fullscreenchange', () => setTimeout(draw, 500));
+        
+        window.handleDirectDonation = async () => {
+            const amount = prompt("Enter donation amount ($):", "25");
+            if (!amount || isNaN(amount) || amount <= 0) return;
+
+            const { data, error } = await crucible_supabase.functions.invoke('direct-donation', {
+                body: {
+                    amount: parseFloat(amount),
+                    is_donation_only: true
+                }
+
+            });
+
+            if (error) {
+                console.error("Donation Error:", error);
+                alert("Could not open donation portal.");
+            }
+            if (data?.url) window.location.href = data.url;
+        };
+
+        function triggerConfetti() {
+            var count = 200;
+            var defaults = { origin: { y: 0.7 }, colors: ['#c9a227', '#f4f0e6', '#a6851e'] };
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, { particleCount: Math.floor(count * particleRatio) }));
+            }
+            fire(0.25, { spread: 26, startVelocity: 55 });
+            fire(0.2, { spread: 60 });
+            fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+            fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+            fire(0.1, { spread: 120, startVelocity: 45 });
+        }
+
         let cart = [];
 
-        // --- VIEW CONTROLLER ---
         function showView(view) {
             document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
             document.getElementById(view + '-view').style.display = 'block';
+
             document.getElementById('btn-arena').style.opacity = (view === 'arena') ? '1' : '0.6';
             document.getElementById('btn-menu').style.opacity = (view === 'menu') ? '1' : '0.6';
+
             if (view === 'arena') setTimeout(draw, 100);
         }
 
-        // --- LOAD DATA ---
-        async function load() {
-            const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
-            if (!data) return;
-
-            LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
-            if (LOCKED) {
-                document.getElementById('reg-ui').style.display = 'none';
-                document.getElementById('locked-msg').style.display = 'block';
-            }
-
-            // 1. Filter for Bracket (Exclude donations/locks)
-            const players = data.filter(t => !t.team_name.startsWith('DONATION_') && t.team_name !== 'ADMIN_LOCK');
-
-            // 2. Sum the Donation Bar
-            let totalRaised = data.reduce((acc, item) => acc + Number(item.amount || 0), 0);
-            document.getElementById('raised').innerText = totalRaised.toFixed(2);
-            document.getElementById('goalFill').style.width = Math.min((totalRaised / GOAL) * 100, 100) + "%";
-            document.getElementById('goalText').innerText = `$${totalRaised.toFixed(2)} / $${GOAL} Goal`;
-
-            // 3. Render Bracket or Waiting Message
-            if (players.length > 0) {
-                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                document.getElementById('ticker').innerText = `[UPDATE: ${time}] LATEST ENTRY: ${players[players.length - 1].team_name} joined!`;
-
-                // LONE WOLF MATH
-                const effectiveCount = Math.max(players.length, 2);
-                const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
-                const rounds = Math.ceil(Math.log2(size));
-
-                render(players, rounds);
-            } else {
-                document.getElementById('root').innerHTML = "<div style='padding:50px; opacity:0.3;'>Waiting for teams...</div>";
-            }
-        }
-
-        // --- RENDER BRACKET ---
-        function render(players, rounds) {
-            const root = document.getElementById('root');
-            root.innerHTML = '';
-
-            const effectiveCount = Math.max(players.length, 2);
-            const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
-
-            for (let r = 0; r < rounds; r++) {
-                const roundDiv = document.createElement('div');
-                roundDiv.className = 'round';
-                const mCount = size / Math.pow(2, r + 1);
-
-                for (let m = 0; m < mCount; m++) {
-                    const getOccupant = (slot) => {
-                        const rangeSize = Math.pow(2, r);
-                        const startIdx = (m * 2 + slot) * rangeSize;
-                        return players.slice(startIdx, startIdx + rangeSize).find(p => p.bracket_round >= r);
-                    };
-
-                    const t1 = getOccupant(0);
-                    const t2 = getOccupant(1);
-
-                    roundDiv.innerHTML += `
-                            <div class="match" id="r${r}m${m}">
-                                <div class="team ${t1?.bracket_round > r ? 'winner-glow' : ''}" onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
-                                    ${t1 ? t1.team_name : (r === 0 ? '---' : 'TBD')}
-                                </div>
-                                <div class="team ${t2?.bracket_round > r ? 'winner-glow' : ''}" onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
-                                    ${t2 ? t2.team_name : (r === 0 ? '---' : 'TBD')}
-                                </div>
-                            </div>`;
-                }
-                root.appendChild(roundDiv);
-            }
-            setTimeout(draw, 300);
-        }
-
-        // --- SVG DRAWING ---
-        function draw() {
-            const svg = document.getElementById('lines');
-            const root = document.getElementById('root');
-            if (!svg || !root) return;
-
-            svg.setAttribute('width', root.scrollWidth);
-            svg.setAttribute('height', root.scrollHeight);
-            svg.innerHTML = '';
-
-            const rounds = document.querySelectorAll('.round');
-            const cont = root.getBoundingClientRect();
-
-            for (let i = 0; i < rounds.length - 1; i++) {
-                const matches = rounds[i].querySelectorAll('.match');
-                const nextMatches = rounds[i + 1].querySelectorAll('.match');
-                matches.forEach((m, idx) => {
-                    const target = nextMatches[Math.floor(idx / 2)];
-                    if (!target) return;
-                    const b1 = m.getBoundingClientRect(), b2 = target.getBoundingClientRect();
-                    const x1 = b1.right - cont.left, y1 = b1.top + (b1.height / 2) - cont.top;
-                    const x2 = b2.left - cont.left, y2 = b2.top + (b2.height / 2) - cont.top;
-
-                    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    p.setAttribute("d", `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`);
-                    p.setAttribute("class", "flow-line");
-                    svg.appendChild(p);
-                });
-            }
-        }
-
-        // --- MENU & CART ---
+  
         const menuItems = [
             { id: 'piz', name: "Pizza Slice", price: 2.00 },
             { id: 'pop', name: "Popsicle", price: 1.00 },
@@ -480,13 +419,28 @@
         function renderMenu() {
             const grid = document.getElementById('food-grid');
             grid.innerHTML = menuItems.map(item => `
-                    <div class="match" style="width:auto; cursor:default;">
-                        <div style="color:var(--gold); font-weight:bold;">${item.name}</div>
-                        <div style="margin:10px 0;">$${item.price.toFixed(2)}</div>
-                        <button class="primary-btn" style="padding:5px 12px; font-size:11px;" onclick="addToCart('${item.id}')">+ Add</button>
-                    </div>
-                `).join('');
+        <div class="match" style="width:auto; cursor:default;">
+            <div style="color:var(--gold); font-weight:bold;">${item.name}</div>
+            <div style="margin:10px 0;">$${item.price.toFixed(2)}</div>
+            <button class="primary-btn" style="padding:5px 12px; font-size:11px;" onclick="addToCart('${item.id}')">+ Add</button>
+        </div>
+    `).join('');
         }
+
+        window.checkoutFood = async () => {
+            if (cart.length === 0) return alert("Your tray is empty!");
+
+            const { data, error } = await crucible_supabase.functions.invoke('food-purchase-stripe', {
+                body: { items: cart }
+            });
+
+            if (error) {
+                console.error("Cart Error:", error);
+                return alert("Checkout failed. Check the console.");
+            }
+
+            if (data?.url) window.location.href = data.url;
+        };
 
         function addToCart(id) {
             const item = menuItems.find(i => i.id === id);
@@ -502,23 +456,162 @@
             list.innerHTML = cart.map(c => {
                 total += (c.price * c.qty);
                 return `<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
-                        <span>${c.qty}x ${c.name}</span><span>$${(c.price * c.qty).toFixed(2)}</span>
-                    </div>`;
+            <span>${c.qty}x ${c.name}</span><span>$${(c.price * c.qty).toFixed(2)}</span>
+        </div>`;
             }).join('');
             document.getElementById('cart-total').innerText = total.toFixed(2);
         }
 
-        window.checkoutFood = async () => {
-            if (cart.length === 0) return alert("Tray is empty!");
-            const { data, error } = await crucible_supabase.functions.invoke('food-purchase-stripe', { body: { items: cart } });
-            if (data?.url) window.location.href = data.url;
+        window.addEventListener('load', renderMenu);    
+
+        async function load() {
+            const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
+
+            if (data) {
+                LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
+                if (LOCKED) {
+                    document.getElementById('reg-ui').style.display = 'none';
+                    document.getElementById('locked-msg').style.display = 'block';
+                }
+
+                const totalPaid = data.filter(t => t.team_name !== 'ADMIN_LOCK');
+                const players = data.filter(t =>
+                    !t.team_name.startsWith('DONATION_') &&
+                    t.team_name !== 'ADMIN_LOCK'
+                );
+
+                let totalRaised = 0;
+                totalPaid.forEach(item => {
+                    totalRaised += Number(item.amount || 0);
+                });
+
+                document.getElementById('raised').innerText = totalRaised.toFixed(2);
+                document.getElementById('goalFill').style.width = Math.min((totalRaised / GOAL) * 100, 100) + "%";
+                document.getElementById('goalText').innerText = `$${totalRaised.toFixed(2)} / $${GOAL} Goal`;
+
+                if (players.length > 0) {
+                    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                    document.getElementById('ticker').innerText = `[UPDATE: ${time}] LATEST ENTRY: ${players[players.length - 1].team_name} joined! • ${players.length} squads locked in.`;
+
+                    const effectiveCount = Math.max(players.length, 2);
+                    const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
+                    const rounds = Math.ceil(Math.log2(size));
+
+                    const champion = players.find(p => p.bracket_round === rounds && players.length > 1);
+
+                    if (champion && champion.team_name !== lastChampion) {
+                        lastChampion = champion.team_name;
+                        triggerConfetti();
+                    }
+                    render(players, rounds);
+                } else {
+                    document.getElementById('root').innerHTML = "<div style='width:100%; text-align:center; padding:50px; opacity:0.3;'>Waiting on the first team to join the Arena...</div>";
+                }
+            }
+        }
+
+        // --- RESTORED RENDER ---
+        function render(players, rounds) {
+            const root = document.getElementById('root');
+            const svg = document.getElementById('lines');
+
+            // We clear the root but RE-ATTACH the SVG so it stays as the background
+            root.innerHTML = '';
+            root.appendChild(svg);
+
+            const effectiveCount = Math.max(players.length, 2);
+            const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
+
+            for (let r = 0; r < rounds; r++) {
+                const roundDiv = document.createElement('div');
+                roundDiv.className = 'round';
+                const mCount = size / Math.pow(2, r + 1);
+
+                for (let m = 0; m < mCount; m++) {
+                    const getOccupant = (slot) => {
+                        const rangeSize = Math.pow(2, r);
+                        const startIdx = (m * 2 + slot) * rangeSize;
+                        // Seeding logic to find the player at the correct round
+                        return players.slice(startIdx, startIdx + rangeSize).find(p => p.bracket_round >= r);
+                    };
+
+                    const t1 = getOccupant(0);
+                    const t2 = getOccupant(1);
+                    const isBye = (r === 0 && t1 && !t2 && players.length > mCount);
+
+                    roundDiv.innerHTML += `
+                <div class="match" id="r${r}m${m}">
+                    <div class="team ${t1?.bracket_round > r || isBye ? 'winner-glow' : ''}" 
+                         onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
+                         ${t1 ? t1.team_name : (r === 0 ? '---' : 'TBD')} ${isBye ? '(BYE)' : ''}
+                    </div>
+                    <div class="team ${t2?.bracket_round > r ? 'winner-glow' : ''}" 
+                         onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
+                         ${t2 ? t2.team_name : (r === 0 ? '---' : 'TBD')}
+                    </div>
+                </div>`;
+                }
+                root.appendChild(roundDiv);
+            }
+            // Update SVG size to match the new horizontal width
+            setTimeout(() => {
+                svg.setAttribute('width', root.scrollWidth);
+                svg.setAttribute('height', root.scrollHeight);
+                draw();
+            }, 300);
+        }
+
+       
+        window.advance = async (e, w, l, r, m) => {
+            if (!e.altKey || !w || w === 'undefined') return;
+            await crucible_supabase.from('teams').update({ bracket_round: r + 1, bracket_match: Math.floor(m / 2), is_top: (m % 2 === 0), is_loser: false }).eq('team_name', w);
+            if (l && l !== 'undefined') await crucible_supabase.from('teams').update({ is_loser: true }).eq('team_name', l);
         };
 
-        // --- INITIALIZE ---
-        window.addEventListener('load', () => { renderMenu(); load(); });
-        window.onresize = draw;
-        crucible_supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, load).subscribe();
+        window.toggleLock = async (e) => {
+            if (!e.altKey) return;
+            const p = prompt("Admin ('reset' or 'phi2026'):");
+            if (p === 'reset') {
+                if (confirm("Wipe database?")) {
+                    await crucible_supabase.from('teams').delete().neq('team_name', 'VOID');
+                    location.reload();
+                }
+                return;
+            }
+            if (p === 'phi2026') {
+                await crucible_supabase.from('teams').insert([{ team_name: 'ADMIN_LOCK', paid: true }]);
+                location.reload();
+            }
+        };
 
+        function draw() {
+            const svg = document.getElementById('lines');
+            const root = document.getElementById('root');
+            if (!svg || !root) return; // FIX: Exit early if elements are missing
+
+            const cont = root.getBoundingClientRect();
+            svg.innerHTML = '';
+            const rDivs = document.querySelectorAll('.round');
+            for (let i = 0; i < rDivs.length - 1; i++) {
+                const matches = rDivs[i].querySelectorAll('.match');
+                const next = rDivs[i + 1].querySelectorAll('.match');
+                matches.forEach((m, idx) => {
+                    const target = next[Math.floor(idx / 2)];
+                    if (!target) return;
+                    const b1 = m.getBoundingClientRect(), b2 = target.getBoundingClientRect();
+                    // Relative coordinates for scrolling container
+                    const x1 = b1.right - cont.left, y1 = b1.top + (b1.height / 2) - cont.top;
+                    const x2 = b2.left - cont.left, y2 = b2.top + (b2.height / 2) - cont.top;
+                    const hasWinner = m.querySelectorAll('.winner-glow').length > 0;
+                    const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    p.setAttribute("d", `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`);
+                    p.setAttribute("class", "flow-line " + (hasWinner ? "active" : ""));
+                    svg.appendChild(p);
+                });
+            }
+        }
+
+        document.getElementById('mainTitle').addEventListener('click', toggleLock);
         document.getElementById('regBtn').addEventListener('click', async () => {
             const name = document.getElementById("teamName").value;
             const size = document.getElementById("teamSize").value;
@@ -526,11 +619,7 @@
             const { data } = await crucible_supabase.functions.invoke('resister-team-stripe', { body: { teamName: name, teamSize: size } });
             if (data?.url) window.location.href = data.url;
         });
-
-        function toggleFS() {
-            const el = document.getElementById('fsContainer');
-            if (!document.fullscreenElement) el.requestFullscreen();
-            else document.exitFullscreen();
-        }</script>
+        crucible_supabase.channel('any').on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, load).subscribe();
+        window.onload = load; window.onresize = draw;</script>
 </body>
 </html>
