@@ -456,6 +456,23 @@
     `).join('');
         }
 
+        window.checkoutFood = async () => {
+            if (cart.length === 0) return alert("Your tray is empty!");
+
+            // 1. Call your specific food purchase function
+            const { data, error } = await crucible_supabase.functions.invoke('food-purchase-stripe', {
+                body: { items: cart }
+            });
+
+            if (error) {
+                console.error("Cart Error:", error);
+                return alert("Checkout failed. Check the console.");
+            }
+
+            // 2. Send them to Stripe
+            if (data?.url) window.location.href = data.url;
+        };
+
         function addToCart(id) {
             const item = menuItems.find(i => i.id === id);
             const existing = cart.find(c => c.id === id);
@@ -477,7 +494,7 @@
         }
 
         // Call renderMenu on start
-        window.addEventListener('load', renderMenu);
+        window.addEventListener('load', renderMenu);    
         function render(players, rounds) {
             const root = document.getElementById('root');
             const svg = document.getElementById('lines');
