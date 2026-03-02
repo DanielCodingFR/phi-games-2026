@@ -430,19 +430,17 @@
         }
         let cart = [];
 
-        // Swaps the views without reloading
         function showView(view) {
             document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
             document.getElementById(view + '-view').style.display = 'block';
 
-            // Highlight active button
             document.getElementById('btn-arena').style.opacity = (view === 'arena') ? '1' : '0.6';
             document.getElementById('btn-menu').style.opacity = (view === 'menu') ? '1' : '0.6';
 
-            if (view === 'arena') setTimeout(draw, 100); // Redraw bracket lines
+            if (view === 'arena') setTimeout(draw, 100);
         }
 
-        // Menu Items from your poster
+  
         const menuItems = [
             { id: 'piz', name: "Pizza Slice", price: 2.00 },
             { id: 'pop', name: "Popsicle", price: 1.00 },
@@ -463,7 +461,6 @@
         window.checkoutFood = async () => {
             if (cart.length === 0) return alert("Your tray is empty!");
 
-            // 1. Call your specific food purchase function
             const { data, error } = await crucible_supabase.functions.invoke('food-purchase-stripe', {
                 body: { items: cart }
             });
@@ -473,7 +470,6 @@
                 return alert("Checkout failed. Check the console.");
             }
 
-            // 2. Send them to Stripe
             if (data?.url) window.location.href = data.url;
         };
 
@@ -497,7 +493,6 @@
             document.getElementById('cart-total').innerText = total.toFixed(2);
         }
 
-        // Call renderMenu on start
         window.addEventListener('load', renderMenu);    
         function render(players, rounds) {
             const root = document.getElementById('root');
