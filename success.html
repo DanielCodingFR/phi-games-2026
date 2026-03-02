@@ -95,29 +95,47 @@
         <div style="margin-top:25px; font-size:12px; color:var(--gold);">Supporting Iron Phi & ALS Research</div>
     </div>
 
-    <script>const urlParams = new URLSearchParams(window.location.search);
+    <script>// 1. Setup Supabase (Use your public keys)
+        const supabaseUrl = 'https://dlrjujkapopwovjqlpew.supabase.co';
+        const supabaseKey = 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU'; // Your public key
+        const _supabase = netlify.createClient(supabaseUrl, supabaseKey); // or however you initialized it
+
+        const urlParams = new URLSearchParams(window.location.search);
         const type = urlParams.get('type');
         const sessionId = urlParams.get('session_id');
 
-        // 1. Generate the Code from the Session ID
-        if (sessionId) {
+        async function generateReceipt() {
+            if (!sessionId) return;
+
+            // Display the PHI-XXXX code immediately from the URL
             document.getElementById('phi-code').innerText = "PHI-" + sessionId.slice(-6).toUpperCase();
+
+            if (type === 'food' || type === 'bundle') {
+                document.getElementById('receipt-box').style.display = 'block';
+                document.getElementById('status-title').innerText = "ORDER CONFIRMED";
+
+                // 2. FETCH THE ACTUAL ITEMS FROM SUPABASE
+                const { data, error } = await _supabase
+                    .from('orders')
+                    .select('items')
+                    .eq('session_id', sessionId)
+                    .single();
+
+                if (data && data.items) {
+                    const itemsList = data.items.map(item =>
+                        `<div>• ${item.qty}x ${item.name}</div>`
+                    ).join('');
+                    document.getElementById('order-items').innerHTML = itemsList;
+                } else {
+                    document.getElementById('order-items').innerText = "Loading items...";
+                }
+            } else if (type === 'donation') {
+                document.getElementById('status-title').innerText = "LEGACY DONOR";
+                document.getElementById('main-msg').innerText = "Thanks for supporting the philanthropy!";
+            }
         }
 
-        // 2. Logic Switcher
-        if (type === 'food' || type === 'bundle') {
-            document.getElementById('status-title').innerText = "ORDER READY";
-            document.getElementById('main-msg').innerText = "Show the code below to the brothers on duty.";
-            document.getElementById('receipt-box').style.display = 'block';
-
-            // Note: In a real environment, you'd fetch the items from your DB using the session_id.
-            // For now, we display a generic confirmation.
-            document.getElementById('order-items').innerHTML = "• Verified Menu Items<br>• Prepared for Pickup";
-        } else if (type === 'donation') {
-            const amount = urlParams.get('amount') || "your";
-            document.getElementById('main-msg').innerText = `Thanks for donating $${amount} to the philanthropy!`;
-        } else if (type === 'team') {
-            document.getElementById('main-msg').innerText = "Your team has been enlisted in the bracket.";
-        }</script>
+        generateReceipt();
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#c9a227', '#ffffff'] });</script>
 </body>
 </html>

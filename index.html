@@ -444,6 +444,9 @@
         const menuItems = [
             { id: 'piz', name: "Pizza Slice", price: 2.00 },
             { id: 'pop', name: "Popsicle", price: 1.00 },
+            { id: 'lemon', name: "Lemonade", price: 1.00 },
+            { id: 'combo', name: "Pizza + Drink", price: 5.00 },
+            { id: 'play', name: "Single Play", price: 3.00 },
             { id: 'slap', name: "Slap a Phi", price: 2.00 }
         ];
 
@@ -500,7 +503,9 @@
             root.innerHTML = '';
             root.appendChild(svg);
 
-            const size = Math.pow(2, Math.ceil(Math.log2(players.length)));
+            const effectivePlayerCount = Math.max(players.length, 2);
+            const size = Math.pow(2, Math.ceil(Math.log2(effectivePlayerCount)));
+            const actualRounds = Math.max(rounds, 1);;
 
             for (let r = 0; r < rounds; r++) {
                 const roundDiv = document.createElement('div');
