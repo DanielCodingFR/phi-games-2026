@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enlisted | Phi-Games 2026</title>
+    <title>Verified | Phi-Games 2026</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -21,88 +21,103 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            overflow: hidden;
+            min-height: 100vh;
             text-align: center;
         }
 
         .success-card {
             background: var(--glass);
-            padding: 50px;
+            padding: 40px;
             border-radius: 15px;
-            border: 1px solid rgba(201, 162, 39, 0.3);
+            border: 1px solid rgba(201,162,39,0.3);
             box-shadow: 0 20px 50px rgba(0,0,0,0.6);
             max-width: 500px;
             width: 90%;
-            animation: fadeIn 1s ease-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        img {
-            width: 80px;
-            filter: drop-shadow(0 0 10px var(--gold-glow));
-            margin-bottom: 20px;
         }
 
         h1 {
             font-family: 'Cinzel', serif;
             color: var(--gold);
-            font-size: 32px;
-            margin: 0 0 15px;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
+            margin: 0 0 20px;
         }
 
-        p {
-            font-size: 16px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-            opacity: 0.9;
+        .receipt-container {
+            background: rgba(0,0,0,0.3);
+            border: 1px dashed var(--gold);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .code {
+            font-family: monospace;
+            font-size: 24px;
+            color: var(--gold);
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+        .items-list {
+            text-align: left;
+            font-size: 14px;
+            margin-top: 15px;
+            border-top: 1px solid rgba(201,162,39,0.2);
+            padding-top: 10px;
         }
 
         .primary-btn {
             padding: 15px 35px;
             background: var(--gold);
-            color: #0c1f33;
-            border: none;
+            color: var(--navy);
             border-radius: 8px;
             font-weight: 800;
             font-family: 'Cinzel', serif;
-            cursor: pointer;
             text-decoration: none;
-            transition: 0.3s;
             display: inline-block;
-        }
-
-        .primary-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px var(--gold-glow);
-        }
-
-        .philanthropy-note {
-            margin-top: 25px;
-            font-size: 12px;
-            color: var(--gold);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: bold;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
+    <div class="success-card">
+        <h1 id="status-title">TRANSACTION VERIFIED</h1>
+        <p id="main-msg">Thank you for your contribution.</p>
 
-<div class="success-card">
-    <img src="https://upload.wikimedia.org/wikipedia/en/thumb/0/0b/Phi_Delta_Theta_Crest.png/250px-Phi_Delta_Theta_Crest.png" alt="Crest">
-    <h1>PURCHASE COMPLETE</h1>
-    <p>Thank you for donating.</p>
-    
-    <a href="index.html" class="primary-btn">RETURN TO BRACKET</a>
+        <div id="receipt-box" class="receipt-container">
+            <div style="font-size: 10px; opacity: 0.7; letter-spacing: 2px;">REDEEMABLE CODE</div>
+            <div id="phi-code" class="code">PHI-LOADING</div>
+            <div id="order-items" class="items-list"></div>
+        </div>
 
-    <div class="philanthropy-note">Supporting Iron Phi & ALS Research</div>
-</div>
+        <a href="index.html" class="primary-btn">RETURN TO ARENA</a>
+        <div style="margin-top:25px; font-size:12px; color:var(--gold);">Supporting Iron Phi & ALS Research</div>
+    </div>
 
+    <script>const urlParams = new URLSearchParams(window.location.search);
+        const type = urlParams.get('type');
+        const sessionId = urlParams.get('session_id');
+
+        // 1. Generate the Code from the Session ID
+        if (sessionId) {
+            document.getElementById('phi-code').innerText = "PHI-" + sessionId.slice(-6).toUpperCase();
+        }
+
+        // 2. Logic Switcher
+        if (type === 'food' || type === 'bundle') {
+            document.getElementById('status-title').innerText = "ORDER READY";
+            document.getElementById('main-msg').innerText = "Show the code below to the brothers on duty.";
+            document.getElementById('receipt-box').style.display = 'block';
+
+            // Note: In a real environment, you'd fetch the items from your DB using the session_id.
+            // For now, we display a generic confirmation.
+            document.getElementById('order-items').innerHTML = "• Verified Menu Items<br>• Prepared for Pickup";
+        } else if (type === 'donation') {
+            const amount = urlParams.get('amount') || "your";
+            document.getElementById('main-msg').innerText = `Thanks for donating $${amount} to the philanthropy!`;
+        } else if (type === 'team') {
+            document.getElementById('main-msg').innerText = "Your team has been enlisted in the bracket.";
+        }</script>
 </body>
 </html>
