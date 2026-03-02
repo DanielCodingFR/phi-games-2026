@@ -463,7 +463,7 @@
         }
 
         window.addEventListener('load', renderMenu);    
-        // Replace your existing load() function with this improved version
+
         async function load() {
             const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
 
@@ -475,9 +475,11 @@
                 }
 
                 const totalPaid = data.filter(t => t.team_name !== 'ADMIN_LOCK');
-                const players = totalPaid.filter(t => t.team_name !== 'DONATION_ONLY');
+                const players = data.filter(t =>
+                    !t.team_name.startsWith('DONATION_') &&
+                    t.team_name !== 'ADMIN_LOCK'
+                );
 
-                // FIXED: Summing total raised with proper decimal support for food/donations
                 let totalRaised = 0;
                 totalPaid.forEach(item => {
                     totalRaised += Number(item.amount || 0);
@@ -491,7 +493,6 @@
                     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
                     document.getElementById('ticker').innerText = `[UPDATE: ${time}] LATEST ENTRY: ${players[players.length - 1].team_name} joined! • ${players.length} squads locked in.`;
 
-                    // FIXED: LONE WOLF LOGIC - Force at least 1 round even for 1 player
                     const effectiveCount = Math.max(players.length, 2);
                     const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
                     const rounds = Math.ceil(Math.log2(size));
@@ -509,12 +510,10 @@
             }
         }
 
-        // Replace your existing render() function with this one
         function render(players, rounds) {
             const root = document.getElementById('root');
             const svg = document.getElementById('lines');
             root.innerHTML = '';
-            // We don't append SVG here anymore because it's fixed in your HTML structure
 
             const effectiveCount = Math.max(players.length, 2);
             const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
