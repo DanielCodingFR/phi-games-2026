@@ -365,7 +365,11 @@
             if (!amount || isNaN(amount) || amount <= 0) return;
 
             const { data, error } = await crucible_supabase.functions.invoke('direct-donation', {
-                body: { amount: parseFloat(amount) }
+                body: {
+                    amount: parseFloat(amount),
+                    is_donation_only: true
+                }
+
             });
 
             if (error) {
