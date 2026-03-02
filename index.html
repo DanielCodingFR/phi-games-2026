@@ -272,6 +272,33 @@
         <div class="sub-head">A Philanthropy Event for Phi Delt</div>
     </header>
 
+    <div style="display: flex; justify-content: center; gap: 15px; margin: 20px 0;">
+        <button class="primary-btn" id="btn-arena" onclick="showView('arena')">Tournament Arena</button>
+        <button class="primary-btn" id="btn-menu" style="background: #1e3a5f; color: var(--gold);" onclick="showView('menu')">The Menu</button>
+    </div>
+
+    <div id="arena-view" class="view-section">
+    </div>
+
+    <div id="menu-view" class="view-section" style="display: none;">
+        <div class="container" style="grid-template-columns: 1fr 350px;">
+            <div class="card">
+                <h2 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;"Phi-Games Menu</h2>
+                <div id="food-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px;">
+                </div>
+            </div>
+            <div class="card">
+                <h3 style="font-family: 'Cinzel'; color: var(--gold); margin-top:0;">Your Tray</h3>
+                <div id="cart-items" style="min-height: 100px; margin-bottom: 15px;">
+                    <p style="opacity:0.3; text-align:center;">Tray is empty.</p>
+                </div>
+                <div style="font-weight: bold; border-top: 1px solid var(--gold); padding-top: 10px;">
+                    Total: $<span id="cart-total">0.00</span>
+                </div>
+                <button class="primary-btn" style="width: 100%; margin-top: 20px;" onclick="checkoutFood()">Checkout Tray</button>
+            </div>
+        </div>
+    </div>
     <div class="container">
         <div class="live-feed"><div class="ticker" id="ticker">Sign up to Join in...</div></div>
 
@@ -423,19 +450,19 @@
                     const isBye = (r === 0 && t1 && !t2 && players.length > mCount);
 
                     roundDiv.innerHTML += `<div class="match" id="r${r}m${m}" style="position:relative;">
-                    <div class="team ${t1?.is_loser ? 'loser' : ''} ${t1?.bracket_round > r || isBye ? 'winner-glow' : ''}"
-                         onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
-                         ${t1?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
-                         ${t1 ? t1.team_name : (r === 0 ? '---' : 'TBD')} ${isBye ? '(BYE)' : ''}
-                         ${t1 && t1.team_size ? `<span class="player-count">${t1.team_size} Players</span>` : ''}
-                    </div>
-                    <div class="team ${t2?.is_loser ? 'loser' : ''} ${t2?.bracket_round > r ? 'winner-glow' : ''}"
-                         onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
-                         ${t2?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
-                         ${t2 ? t2.team_name : (r === 0 ? '---' : 'TBD')}
-                         ${t2 && t2.team_size ? `<span class="player-count">${t2.team_size} Players</span>` : ''}
-                    </div>
-                </div>`;
+                        <div class="team ${t1?.is_loser ? 'loser' : ''} ${t1?.bracket_round > r || isBye ? 'winner-glow' : ''}"
+                             onclick="advance(event,'${t1?.team_name}','${t2?.team_name}',${r},${m})">
+                             ${t1?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
+                             ${t1 ? t1.team_name : (r === 0 ? '---' : 'TBD')} ${isBye ? '(BYE)' : ''}
+                             ${t1 && t1.team_size ? `<span class="player-count">${t1.team_size} Players</span>` : ''}
+                        </div>
+                        <div class="team ${t2?.is_loser ? 'loser' : ''} ${t2?.bracket_round > r ? 'winner-glow' : ''}"
+                             onclick="advance(event,'${t2?.team_name}','${t1?.team_name}',${r},${m})">
+                             ${t2?.bracket_round === rounds ? '<div style="position:absolute; top:-25px; left:50%; transform:translateX(-50%); font-size:24px;">👑</div>' : ''}
+                             ${t2 ? t2.team_name : (r === 0 ? '---' : 'TBD')}
+                             ${t2 && t2.team_size ? `<span class="player-count">${t2.team_size} Players</span>` : ''}
+                        </div>
+                    </div>`;
                 }
                 root.appendChild(roundDiv);
             }
