@@ -413,16 +413,23 @@
             if (view === 'arena') setTimeout(draw, 100);
         }
 
+        window.handleDirectDonation = async () => {
+            const amount = prompt("Enter donation amount ($):", "25");
+            if (!amount || isNaN(amount) || amount <= 0) return;
+            const { data, error } = await crucible_supabase.functions.invoke('direct-donation', {
+                body: { amount: parseFloat(amount), is_donation_only: true }
+            });
+            if (error) { console.error("Donation Error:", error); alert("Could not open donation portal."); }
+            if (data?.url) window.location.href = data.url;
+        };
         async function load() {
             const { data } = await crucible_supabase.from('teams').select('*').eq('paid', true).order('created_at', { ascending: true });
             if (data) {
                 LOCKED = data.some(t => t.team_name === 'ADMIN_LOCK');
                 if (LOCKED) { document.getElementById('reg-ui').style.display = 'none'; document.getElementById('locked-msg').style.display = 'block'; }
 
-                // 1. Filter out donations and admin rows
                 const players = data.filter(t => !t.team_name.startsWith('DONATION_') && t.team_name !== 'ADMIN_LOCK');
 
-                // 2. Sum the real contribution amount for the bar
                 let totalRaised = data.reduce((acc, item) => acc + Number(item.amount || 0), 0);
 
                 document.getElementById('raised').innerText = totalRaised.toFixed(2);
@@ -433,13 +440,11 @@
                     const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                     document.getElementById('ticker').innerText = `[UPDATE: ${time}] LATEST ENTRY: ${players[players.length - 1].team_name} joined!`;
 
-                    // 3. Mathematical bracket sizing based on participant count
                     const effectiveCount = Math.max(players.length, 2);
                     const size = Math.pow(2, Math.ceil(Math.log2(effectiveCount)));
                     const maxRounds = Math.log2(size);
                     const champion = players.find(p => p.bracket_round === maxRounds);
 
-                    // 4. Champion Detection Logic
                     if (champion && champion.team_name !== lastChampion) {
                         lastChampion = champion.team_name;
                         document.getElementById('champion-name').innerText = champion.team_name;
@@ -453,7 +458,6 @@
             }
         }
 
-        // --- RESTORED RENDER (Fixed Horizontal Boxes) ---
         function render(players, rounds) {
             const root = document.getElementById('root');
             const svg = document.getElementById('lines');
