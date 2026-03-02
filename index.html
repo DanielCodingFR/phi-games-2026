@@ -347,7 +347,8 @@
         </div>
     </div>
 
-    <script>const crucible_supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
+    <script>
+        const crucible_supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
         let LOCKED = false;
         const GOAL = 2000;
         let lastChampion = null;
@@ -358,7 +359,7 @@
             else document.exitFullscreen();
         }
         document.addEventListener('fullscreenchange', () => setTimeout(draw, 500));
-
+        
         window.handleDirectDonation = async () => {
             const amount = prompt("Enter donation amount ($):", "25");
             if (!amount || isNaN(amount) || amount <= 0) return;
@@ -423,7 +424,60 @@
                 }
             }
         }
+        let cart = [];
 
+        // Swaps the views without reloading
+        function showView(view) {
+            document.querySelectorAll('.view-section').forEach(v => v.style.display = 'none');
+            document.getElementById(view + '-view').style.display = 'block';
+
+            // Highlight active button
+            document.getElementById('btn-arena').style.opacity = (view === 'arena') ? '1' : '0.6';
+            document.getElementById('btn-menu').style.opacity = (view === 'menu') ? '1' : '0.6';
+
+            if (view === 'arena') setTimeout(draw, 100); // Redraw bracket lines
+        }
+
+        // Menu Items from your poster
+        const menuItems = [
+            { id: 'piz', name: "Pizza Slice", price: 2.00 },
+            { id: 'pop', name: "Popsicle", price: 1.00 },
+            { id: 'slap', name: "Slap a Phi", price: 2.00 }
+        ];
+
+        function renderMenu() {
+            const grid = document.getElementById('food-grid');
+            grid.innerHTML = menuItems.map(item => `
+        <div class="match" style="width:auto; cursor:default;">
+            <div style="color:var(--gold); font-weight:bold;">${item.name}</div>
+            <div style="margin:10px 0;">$${item.price.toFixed(2)}</div>
+            <button class="primary-btn" style="padding:5px 12px; font-size:11px;" onclick="addToCart('${item.id}')">+ Add</button>
+        </div>
+    `).join('');
+        }
+
+        function addToCart(id) {
+            const item = menuItems.find(i => i.id === id);
+            const existing = cart.find(c => c.id === id);
+            if (existing) existing.qty++;
+            else cart.push({ ...item, qty: 1 });
+            updateCart();
+        }
+
+        function updateCart() {
+            const list = document.getElementById('cart-items');
+            let total = 0;
+            list.innerHTML = cart.map(c => {
+                total += (c.price * c.qty);
+                return `<div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:8px;">
+            <span>${c.qty}x ${c.name}</span><span>$${(c.price * c.qty).toFixed(2)}</span>
+        </div>`;
+            }).join('');
+            document.getElementById('cart-total').innerText = total.toFixed(2);
+        }
+
+        // Call renderMenu on start
+        window.addEventListener('load', renderMenu);
         function render(players, rounds) {
             const root = document.getElementById('root');
             const svg = document.getElementById('lines');
