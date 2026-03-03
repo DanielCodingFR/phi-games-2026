@@ -539,7 +539,7 @@
         };
 
         // MENU & CHECKOUT
-        const menuItems = [{ id: 'piz', name: "Pizza Slice", price: 2.00 }, { id: 'pop', name: "Popsicle", price: 1.00 }, { id: 'lemon', name: "Sweet Tea", price: 1.00 }, { id: 'combo', name: "2x Pizza + Drink", price: 5.00 }, { id: 'play', name: "Single Play", price: 3.00 }, { id: 'slap', name: "Slap a Phi", price: 2.00 }, { id: 'popcorn', name: "Popcorn", price: 1.00 }];
+        const menuItems = [{ id: 'piz', name: "Pizza Slice", price: 2.00 }, { id: 'pop', name: "Popsicle", price: 1.00 }, { id: 'lemon', name: "Sweet Tea", price: 1.00 }, { id: 'combo', name: "2x Pizza + Drink", price: 5.00 }, { id: 'play', name: "Single Play", price: 3.00 }, { id: 'slap', name: "Slap a Phi", price: 2.00 }, { id: 'popcorn', name: "Popcorn", price: 2.00 }];
         function renderMenu() {
             const grid = document.getElementById('food-grid');
             grid.innerHTML = menuItems.map(item => `<div class="match" style="width:auto; cursor:default;"><div style="color:var(--gold); font-weight:bold;">${item.name}</div><div style="margin:10px 0;">$${item.price.toFixed(2)}</div><button class="primary-btn" style="padding:5px 12px; font-size:11px;" onclick="addToCart('${item.id}')">+ Add</button></div>`).join('');
