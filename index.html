@@ -365,7 +365,7 @@
                 </div>
                 <div class="progress-wrap">
                     <div class="progress-fill" id="goalFill"></div>
-                    <div class="progress-text" id="goalText">$0 / $2000 Goal</div>
+                    <div class="progress-text" id="goalText">$0 / $5000 Goal</div>
                 </div>
             </div>
 
@@ -403,7 +403,7 @@
 
     <script>const crucible_supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
         let LOCKED = false;
-        const GOAL = 2000;
+        const GOAL = 5000;
         let lastChampion = null;
         let cart = [];
 
@@ -499,7 +499,6 @@
             }, 300);
         }
 
-        // --- RESTORED DRAW (Anchored to Boxes) ---
         function draw() {
             const svg = document.getElementById('lines');
             const root = document.getElementById('root');
@@ -530,10 +529,9 @@
             if (l && l !== 'undefined') await crucible_supabase.from('teams').update({ is_loser: true }).eq('team_name', l);
         };
 
-        // --- RESTORED ADMIN PANEL ---
         window.toggleLock = async (e) => {
             if (!e.altKey) return;
-            const p = prompt("Admin ('reset' or 'phi2026'):");
+            const p = prompt("Admin:");
             if (p === 'reset') {
                 if (confirm("Wipe database?")) { await crucible_supabase.from('teams').delete().neq('team_name', 'VOID'); location.reload(); }
             }
@@ -541,7 +539,7 @@
         };
 
         // MENU & CHECKOUT
-        const menuItems = [{ id: 'piz', name: "Pizza Slice", price: 2.00 }, { id: 'pop', name: "Popsicle", price: 1.00 }, { id: 'lemon', name: "Lemonade", price: 1.00 }, { id: 'combo', name: "Pizza + Drink", price: 5.00 }, { id: 'play', name: "Single Play", price: 3.00 }, { id: 'slap', name: "Slap a Phi", price: 2.00 }];
+        const menuItems = [{ id: 'piz', name: "Pizza Slice", price: 2.00 }, { id: 'pop', name: "Popsicle", price: 1.00 }, { id: 'lemon', name: "Lemonade", price: 1.00 }, { id: 'combo', name: "2x Pizza + Drink", price: 5.00 }, { id: 'play', name: "Single Play", price: 3.00 }, { id: 'slap', name: "Slap a Phi", price: 2.00 }];
         function renderMenu() {
             const grid = document.getElementById('food-grid');
             grid.innerHTML = menuItems.map(item => `<div class="match" style="width:auto; cursor:default;"><div style="color:var(--gold); font-weight:bold;">${item.name}</div><div style="margin:10px 0;">$${item.price.toFixed(2)}</div><button class="primary-btn" style="padding:5px 12px; font-size:11px;" onclick="addToCart('${item.id}')">+ Add</button></div>`).join('');
@@ -572,7 +570,6 @@
             if (data?.url) window.location.href = data.url;
         });
 
-        // Confetti Logic
         function triggerConfetti() {
             var count = 200; var defaults = { origin: { y: 0.7 }, colors: ['#c9a227', '#f4f0e6', '#a6851e'] };
             function fire(p, opts) { confetti(Object.assign({}, defaults, opts, { particleCount: Math.floor(count * p) })); }
