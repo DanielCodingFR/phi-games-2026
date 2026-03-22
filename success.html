@@ -3,20 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verified | Phi-Games 2026</title>
+    <title>Reservation Confirmed</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root {
-            --gold: #c9a227;
-            --navy: #0c1f33;
-            --glass: rgba(20, 45, 76, 0.9);
-        }
-
         body {
             margin: 0;
-            background: radial-gradient(circle at top, #162e4a 0%, #0c1f33 100%);
+            background: #0c1f33;
             color: #f4f0e6;
             font-family: 'Libre Baskerville', serif;
             display: flex;
@@ -25,157 +18,49 @@
             min-height: 100vh;
             text-align: center;
         }
-
-        .success-card {
-            background: var(--glass);
-            padding: 40px;
+        .card {
+            background: rgba(20, 45, 76, 0.9);
+            padding: 50px;
             border-radius: 15px;
-            border: 2px solid var(--gold);
-            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
-            max-width: 450px;
-            width: 90%;
+            border: 2px solid #c9a227;
+            max-width: 400px;
         }
-
-        h1 {
-            font-family: 'Cinzel', serif;
-            color: var(--gold);
-            letter-spacing: 2px;
-            margin: 0;
-            font-size: 28px;
-        }
-
-        .receipt-box {
-            background: rgba(0,0,0,0.4);
-            border: 1px dashed var(--gold);
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            display: none;
-        }
-
-        .phi-code {
+        h1 { font-family: 'Cinzel'; color: #c9a227; margin: 0; }
+        .code {
             font-family: monospace;
-            font-size: 32px;
-            color: var(--gold);
-            font-weight: bold;
-            text-shadow: 0 0 10px rgba(201,162,39,0.5);
+            font-size: 24px;
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            margin: 20px 0;
+            border: 1px dashed #c9a227;
+            color: #c9a227;
         }
-
-        .item-list {
-            text-align: left;
-            font-size: 14px;
-            margin-top: 15px;
-            border-top: 1px solid rgba(201,162,39,0.2);
-            padding-top: 10px;
-        }
-
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 4px 0;
-        }
-
-        .primary-btn {
-            padding: 15px 30px;
-            background: var(--gold);
-            color: var(--navy);
-            border-radius: 8px;
-            font-weight: 800;
-            font-family: 'Cinzel', serif;
-            text-decoration: none;
+        .btn {
             display: inline-block;
-            margin-top: 20px;
+            margin-top: 25px;
+            color: #c9a227;
+            text-decoration: underline;
             cursor: pointer;
-            border: none;
-        }
-
-        #loading-msg {
-            font-style: italic;
-            opacity: 0.7;
-            margin: 15px 0;
+            font-family: 'Cinzel';
         }
     </style>
 </head>
 <body>
-
-    <div class="success-card">
-        <h1 id="status-title">VERIFYING...</h1>
-        <p id="status-desc">Connecting to the Phi Games network.</p>
-
-        <div id="loading-msg">Fetching order details...</div>
-
-        <div id="receipt-box" class="receipt-box">
-            <div style="font-size: 10px; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 5px;">Redemption Code</div>
-            <div id="order-id" class="phi-code">PHI-XXXXXX</div>
-            <div id="item-display" class="item-list"></div>
-        </div>
-
-        <button class="primary-btn" onclick="window.location.href='index.html'">BACK TO ARENA</button>
-        <div style="margin-top: 25px; font-size: 11px; color: var(--gold); letter-spacing: 1px;">SUPPORTING ALS RESEARCH!</div>
+    <div class="card">
+        <h1>RESERVATION SECURED</h1>
+        <p>Your guest has been added to the official list.</p>
+        <div class="code" id="ref-code">VERIFYING...</div>
+        <p style="font-size: 13px; opacity: 0.8;">Please keep this screen for your records.</p>
+        <div class="btn" onclick="window.location.href='index.html'">Return to Portal</div>
     </div>
 
     <script>
-        const _supabase = supabase.createClient('https://dlrjujkapopwovjqlpew.supabase.co', 'sb_publishable_sABzmRtrGXfuU1gYSxp_TQ_EADV6vwU');
-
         const params = new URLSearchParams(window.location.search);
-        const type = params.get('type');
-        const sessionId = params.get('session_id');
-
-        async function checkOrder(retries = 5) {
-            if (!sessionId) {
-                document.getElementById('status-title').innerText = "THANK YOU";
-                document.getElementById('loading-msg').style.display = 'none';
-                return;
-            }
-
-            document.getElementById('order-id').innerText = "PHI-" + sessionId.slice(-6).toUpperCase();
-
-            if (type === 'food' || type === 'bundle') {
-                const { data, error } = await _supabase
-                    .from('orders')
-                    .select('items')
-                    .eq('session_id', sessionId)
-                    .single();
-
-                if (data && data.items) {
-                    document.getElementById('status-title').innerText = "ORDER CONFIRMED";
-                    document.getElementById('status-desc').innerText = "Show this receipt at the Food area.";
-                    document.getElementById('loading-msg').style.display = 'none';
-                    document.getElementById('receipt-box').style.display = 'block';
-
-                    const list = document.getElementById('item-display');
-                    list.innerHTML = data.items.map(i => `
-                        <div class="item-row">
-                            <span>${i.qty}x ${i.name}</span>
-                            <span>$${(i.price * i.qty).toFixed(2)}</span>
-                        </div>
-                    `).join('');
-
-                    triggerConfetti();
-                } else if (retries > 0) {
-                    setTimeout(() => checkOrder(retries - 1), 2000);
-                } else {
-                    document.getElementById('status-title').innerText = "PAYMENT RECEIVED";
-                    document.getElementById('loading-msg').innerText = "Order details are syncing. Please tell staff your code.";
-                }
-            } else {
-                document.getElementById('loading-msg').style.display = 'none';
-                if (type === 'team') {
-                    document.getElementById('status-title').innerText = "SQUAD REGISTERED";
-                    document.getElementById('status-desc').innerText = "Your team is locked into the bracket!";
-                } else {
-                    document.getElementById('status-title').innerText = "LEGACY DONOR";
-                    document.getElementById('status-desc').innerText = "Thank you for supporting the philanthropy.";
-                }
-                triggerConfetti();
-            }
+        const sid = params.get('session_id');
+        if (sid) {
+            document.getElementById('ref-code').innerText = "REF-" + sid.slice(-8).toUpperCase();
         }
-
-        function triggerConfetti() {
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#c9a227', '#ffffff'] });
-        }
-
-        checkOrder();</script>
-
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#c9a227', '#ffffff'] });
+    </script>
 </body>
 </html>
