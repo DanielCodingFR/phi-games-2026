@@ -29,6 +29,7 @@
         h1 { font-family: 'Cinzel', serif; color: var(--gold); letter-spacing: 3px; margin: 0; }
 
         .tab-container { display: flex; gap: 10px; margin: 30px 0; }
+        
         .tab-btn {
             padding: 12px 25px;
             background: rgba(255,255,255,0.05);
@@ -39,44 +40,73 @@
             border-radius: 5px;
             transition: 0.3s;
         }
+        
         .tab-btn.active { background: var(--gold); color: var(--navy); }
 
         .card {
-            background: var(--glass);
+            background: rgba(12, 31, 51, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 40px;
-            border-radius: 12px;
-            border: 1px solid rgba(201, 162, 39, 0.2);
+            border-radius: 16px;
+            border: 1px solid rgba(201, 162, 39, 0.3);
             width: 90%;
             max-width: 450px;
             text-align: center;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6), 0 0 20px rgba(201, 162, 39, 0.1);
             display: none;
+            transform: translateY(10px);
+            animation: slideUp 0.4s ease forwards;
         }
+
         .card.active { display: block; }
 
+        @keyframes slideUp {
+            to { transform: translateY(0); opacity: 1; }
+        }
+
         .price { font-family: 'Cinzel'; font-size: 40px; color: var(--gold); margin: 15px 0; }
+        
         input {
             width: 100%;
             padding: 14px;
             margin: 10px 0;
-            background: #081627;
-            border: 1px solid #1e3a5f;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(201, 162, 39, 0.2);
             color: white;
             border-radius: 6px;
             box-sizing: border-box;
+            font-family: 'Libre Baskerville', serif;
+            transition: border 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border: 1px solid var(--gold);
+            background: rgba(0, 0, 0, 0.6);
         }
 
         .primary-btn {
             width: 100%;
             padding: 16px;
-            background: var(--gold);
+            background: linear-gradient(135deg, #d4af37 0%, #aa8014 100%);
             color: var(--navy);
             border: none;
             border-radius: 6px;
             font-family: 'Cinzel';
             font-weight: 800;
+            font-size: 16px;
+            letter-spacing: 1px;
             margin-top: 20px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(201, 162, 39, 0.2);
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(201, 162, 39, 0.4);
+            filter: brightness(1.1);
         }
     </style>
 </head>
@@ -95,13 +125,13 @@
     <div id="founders" class="card active">
         <h2 style="font-family: 'Cinzel'; margin:0;">Alumni Pins</h2>
         <div class="price">$10.00</div>
-        <input type="text" id="f-guest" placeholder="Brother Name">
+        <input type="text" id="f-brother" placeholder="Brother Name">
         <button class="primary-btn" onclick="checkout('founders')">Purchase Pin</button>
     </div>
 
     <div id="formal" class="card">
         <h2 style="font-family: 'Cinzel'; margin:0;">Plus-One Meal</h2>
-        <div class="price">$20.00</div>
+        <div class="price">$25.00</div>
         <input type="text" id="m-guest" placeholder="Guest Name">
         <input type="text" id="m-brother" placeholder="Brother Name">
         <button class="primary-btn" onclick="checkout('formal')">Purchase Meal</button>
@@ -118,23 +148,38 @@
         }
 
         async function checkout(type) {
-            const guest = document.getElementById(type === 'founders' ? 'f-guest' : 'm-guest').value;
-            const brother = document.getElementById(type === 'founders' ? 'f-brother' : 'm-brother').value;
+            let description = "";
 
-            if(!guest || !brother) return alert("Fill all fields.");
-
-            const description = type === 'founders' ? `FD-GUEST: ${guest}` : `FORMAL-MEAL: ${guest}`;
+            if (type === 'founders') {
+                const brother = document.getElementById('f-brother').value;
+                if (!brother) return alert("Please enter your Brother Name.");
+                description = `ALUMNI PIN: ${brother}`;
+            } else {
+                const guest = document.getElementById('m-guest').value;
+                const brother = document.getElementById('m-brother').value;
+                if (!guest || !brother) return alert("Please fill out both names.");
+                description = `FORMAL-MEAL: ${guest} (Ref: ${brother})`;
+            }
             
-            // We'll use your existing function. Pass the type so your webhook knows which price to hit.
-            const { data } = await _supabase.functions.invoke('resister-team-stripe', { 
-                body: { 
-                    teamName: `${description} (Ref: ${brother})`, 
-                    teamSize: "1",
-                    type: type // Passing this so your logic can switch webhooks/prices
-                } 
-            });
+            const btn = event.currentTarget;
+            const originalText = btn.innerText;
+            btn.innerText = "Securing...";
+            btn.style.opacity = "0.7";
 
-            if (data?.url) window.location.href = data.url;
+            try {
+                const { data } = await _supabase.functions.invoke('resister-team-stripe', { 
+                    body: { 
+                        teamName: description, 
+                        type: type 
+                    } 
+                });
+
+                if (data?.url) window.location.href = data.url;
+            } catch (err) {
+                alert("Connection failed. Try again.");
+                btn.innerText = originalText;
+                btn.style.opacity = "1";
+            }
         }
     </script>
 </body>
