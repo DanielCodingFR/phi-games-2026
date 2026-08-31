@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phi Delt | Alumni Pins & Founders Day</title>
+    <title>Phi Delt | Payments & Shirts</title>
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -67,7 +67,8 @@
 
         .price { font-family: 'Cinzel'; font-size: 40px; color: var(--gold); margin: 15px 0; }
         
-        input {
+        /* Updated to style both inputs and the new select dropdown */
+        input, select {
             width: 100%;
             padding: 14px;
             margin: 10px 0;
@@ -80,10 +81,16 @@
             transition: border 0.3s ease;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             border: 1px solid var(--gold);
             background: rgba(0, 0, 0, 0.6);
+        }
+
+        /* Fix dropdown options text color */
+        select option {
+            background: var(--navy);
+            color: white;
         }
 
         .primary-btn {
@@ -118,23 +125,33 @@
     </header>
 
     <div class="tab-container">
-        <button class="tab-btn active" onclick="switchTab('founders')">Alumni Pins</button>
-        <button class="tab-btn" onclick="switchTab('formal')">Formal</button>
+        <button class="tab-btn active" onclick="switchTab('dues')">Pay Dues</button>
+        <button class="tab-btn" onclick="switchTab('shirt')">Buy Rush Shirt</button>
     </div>
 
-    <div id="founders" class="card active">
-        <h2 style="font-family: 'Cinzel'; margin:0;">Alumni Pins</h2>
-        <div class="price">$10.00</div>
-        <input type="text" id="f-brother" placeholder="Brother Name">
-        <button class="primary-btn" onclick="checkout('founders')">Purchase Pin</button>
+    <!-- Dues Card -->
+    <div id="dues" class="card active">
+        <h2 style="font-family: 'Cinzel'; margin:0;">Member Dues</h2>
+        <div class="price">Custom Amount</div>
+        <input type="text" id="d-name" placeholder="Member Name">
+        <input type="number" id="d-amount" placeholder="Amount ($USD)" min="1" step="any">
+        <button class="primary-btn" onclick="checkout('dues')">Pay via Stripe</button>
     </div>
 
-    <div id="formal" class="card">
-        <h2 style="font-family: 'Cinzel'; margin:0;">Plus-One Meal</h2>
+    <!-- Rush Shirt Card -->
+    <div id="shirt" class="card">
+        <h2 style="font-family: 'Cinzel'; margin:0;">Rush Shirt</h2>
         <div class="price">$25.00</div>
-        <input type="text" id="m-guest" placeholder="Guest Name">
-        <input type="text" id="m-brother" placeholder="Brother Name">
-        <button class="primary-btn" onclick="checkout('formal')">Purchase Meal</button>
+        <input type="text" id="s-name" placeholder="Your Name">
+        <select id="s-size">
+            <option value="" disabled selected>Select Shirt Size</option>
+            <option value="S">Small</option>
+            <option value="M">Medium</option>
+            <option value="L">Large</option>
+            <option value="XL">X-Large</option>
+            <option value="2XL">2X-Large</option>
+        </select>
+        <button class="primary-btn" onclick="checkout('shirt')">Buy Shirt</button>
     </div>
 
     <script>
@@ -148,17 +165,23 @@
         }
 
         async function checkout(type) {
-            let description = "";
+            let payload = { type: type };
 
-            if (type === 'founders') {
-                const brother = document.getElementById('f-brother').value;
-                if (!brother) return alert("Please enter your Brother Name.");
-                description = `ALUMNI PIN: ${brother}`;
-            } else {
-                const guest = document.getElementById('m-guest').value;
-                const brother = document.getElementById('m-brother').value;
-                if (!guest || !brother) return alert("Please fill out both names.");
-                description = `FORMAL-MEAL: ${guest} (Ref: ${brother})`;
+            // Grab the correct inputs based on which tab was clicked
+            if (type === 'dues') {
+                const name = document.getElementById('d-name').value;
+                const amount = document.getElementById('d-amount').value;
+                if (!name || !amount) return alert("Please fill out your name and the payment amount.");
+                
+                payload.name = name;
+                payload.amount = parseFloat(amount);
+            } else if (type === 'shirt') {
+                const name = document.getElementById('s-name').value;
+                const size = document.getElementById('s-size').value;
+                if (!name || !size) return alert("Please fill out your name and select a shirt size.");
+                
+                payload.name = name;
+                payload.size = size;
             }
             
             const btn = event.currentTarget;
@@ -167,11 +190,9 @@
             btn.style.opacity = "0.7";
 
             try {
+                // Calls your existing Supabase Edge Function
                 const { data } = await _supabase.functions.invoke('resister-team-stripe', { 
-                    body: { 
-                        teamName: description, 
-                        type: type 
-                    } 
+                    body: payload 
                 });
 
                 if (data?.url) window.location.href = data.url;
